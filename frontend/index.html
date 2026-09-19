@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoValuate AI - Car Price Prediction System</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js for interactive visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background glow effects -->
+    <div class="bg-blur bg-blur-1"></div>
+    <div class="bg-blur bg-blur-2"></div>
+
+    <header class="navbar">
+        <div class="container nav-content">
+            <div class="logo">
+                <span class="logo-icon">🚗</span>
+                <div>
+                    <h1 class="logo-title">AutoValuate <span class="badge-ai">AI</span></h1>
+                    <p class="logo-subtitle">CarDekho ML Price Prediction Engine</p>
+                </div>
+            </div>
+            <div class="nav-metrics">
+                <span class="stat-pill">
+                    <span class="dot"></span> Model Accuracy: <strong>95.9% R²</strong>
+                </span>
+                <span class="stat-pill secondary">
+                    RMSE: <strong>0.96 Lakhs</strong>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2 class="hero-title">Predict Used Car Market Value with <span class="gradient-text">Machine Learning</span></h2>
+            <p class="hero-desc">
+                Trained on CarDekho historical sales records using an optimized Random Forest Regressor. Get instant, accurate valuations and depreciation insights.
+            </p>
+        </section>
+
+        <!-- Quick Presets -->
+        <div class="preset-wrapper">
+            <span class="preset-label">⚡ Quick Presets:</span>
+            <div class="preset-chips" id="presetChips">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Valuation Workspace Grid -->
+        <div class="workspace-grid">
+            <!-- Left Column: Input Form -->
+            <div class="card form-card">
+                <div class="card-header">
+                    <h3 class="card-title">Vehicle Specifications</h3>
+                    <span class="badge-soft">Step 1: Enter Details</span>
+                </div>
+
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label for="carName">Car Model Name</label>
+                        <input type="text" id="carName" class="form-control" placeholder="e.g. Hyundai i20 Asta, Swift VXi" value="Hyundai i20" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="presentPrice">
+                                Showroom / New Price (₹ Lakhs)
+                                <span class="helper-badge" id="inrHelper">₹ 7,50,000</span>
+                            </label>
+                            <input type="number" step="0.05" min="0.5" max="100" id="presentPrice" class="form-control" value="7.50" required>
+                            <span class="field-hint">e.g., 7.5 = ₹7,50,000</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="year">Manufacturing Year</label>
+                            <select id="year" class="form-control" required>
+                                <!-- Populated dynamically from 2005 to 2024 -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kmsDriven">Kilometers Driven</label>
+                            <input type="number" step="500" min="500" max="500000" id="kmsDriven" class="form-control" value="35000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="owner">Previous Owners</label>
+                            <select id="owner" class="form-control">
+                                <option value="0">First Owner (0 previous)</option>
+                                <option value="1">Second Owner (1 previous)</option>
+                                <option value="2">Third Owner (2 previous)</option>
+                                <option value="3">Fourth or More (3+)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Radio Pill Group: Fuel Type -->
+                    <div class="form-group">
+                        <label>Fuel Type</label>
+                        <div class="segmented-control">
+                            <input type="radio" name="fuelType" id="fuelPetrol" value="Petrol" checked>
+                            <label for="fuelPetrol">⛽ Petrol</label>
+
+                            <input type="radio" name="fuelType" id="fuelDiesel" value="Diesel">
+                            <label for="fuelDiesel">🛢️ Diesel</label>
+
+                            <input type="radio" name="fuelType" id="fuelCNG" value="CNG">
+                            <label for="fuelCNG">🌱 CNG</label>
+                        </div>
+                    </div>
+
+                    <!-- Row for Seller Type & Transmission -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Transmission</label>
+                            <div class="segmented-control">
+                                <input type="radio" name="transmission" id="transManual" value="Manual" checked>
+                                <label for="transManual">Manual</label>
+
+                                <input type="radio" name="transmission" id="transAuto" value="Automatic">
+                                <label for="transAuto">Automatic</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Seller Type</label>
+                            <div class="segmented-control">
+                                <input type="radio" name="sellerType" id="sellerDealer" value="Dealer" checked>
+                                <label for="sellerDealer">Dealer</label>
+
+                                <input type="radio" name="sellerType" id="sellerIndividual" value="Individual">
+                                <label for="sellerIndividual">Individual</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="predictBtn" class="btn btn-primary btn-block">
+                        <span class="btn-text">⚡ Calculate Estimated Selling Price</span>
+                        <span class="spinner" id="spinner"></span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Column: Result Card & Analytics -->
+            <div class="card result-card" id="resultCard">
+                <div class="card-header">
+                    <h3 class="card-title">Valuation Summary</h3>
+                    <span class="badge-tier" id="tierBadge">Ready</span>
+                </div>
+
+                <div class="result-placeholder" id="placeholderView">
+                    <div class="car-illustration">🚘</div>
+                    <h4>Enter car specifications and calculate</h4>
+                    <p>Our machine learning model will predict the current fair resale price and calculate depreciation.</p>
+                </div>
+
+                <div class="result-body" id="predictionView" style="display: none;">
+                    <div class="car-title-badge">
+                        <span class="car-name-display" id="resCarName">Hyundai i20</span>
+                        <span class="age-pill" id="resAgePill">5 Years Old</span>
+                    </div>
+
+                    <div class="price-box">
+                        <span class="price-label">Estimated Fair Selling Price</span>
+                        <div class="price-main">
+                            <span class="currency">₹</span>
+                            <span class="amount" id="resPriceLakhs">5.34</span>
+                            <span class="unit">Lakhs</span>
+                        </div>
+                        <div class="price-sub" id="resPriceINR">₹5,34,000</div>
+                    </div>
+
+                    <div class="depreciation-grid">
+                        <div class="dep-metric">
+                            <span class="metric-lbl">Showroom Price</span>
+                            <span class="metric-val" id="resShowroom">₹7.50 L</span>
+                        </div>
+                        <div class="dep-metric">
+                            <span class="metric-lbl">Estimated Loss</span>
+                            <span class="metric-val text-loss" id="resLoss">₹2.16 L</span>
+                        </div>
+                        <div class="dep-metric">
+                            <span class="metric-lbl">Depreciation</span>
+                            <span class="metric-val text-loss" id="resDepPct">28.8%</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="resRetainedBar" style="width: 71.2%;"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span>Retained Value</span>
+                            <span id="resRetainedLabel">71.2%</span>
+                        </div>
+                    </div>
+
+                    <div class="valuation-insight">
+                        <strong>Market Verdict:</strong> <span id="resTierText">High Value Retention</span>
+                    </div>
+                </div>
+
+                <!-- Model Stats Footer inside card -->
+                <div class="model-stats-footer">
+                    <div class="stat-item">
+                        <span class="label">Algorithm</span>
+                        <span class="value">Random Forest (Tuned)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Test R² Score</span>
+                        <span class="value text-success">0.959</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Test RMSE</span>
+                        <span class="value">₹0.96 L</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Insights & Visualizations Section -->
+        <section class="analytics-section card">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Model Performance & Machine Learning Insights</h3>
+                    <p class="card-subtitle">Detailed evaluation metrics, feature importances, and analytical graphs</p>
+                </div>
+                <div class="tab-controls">
+                    <button class="tab-btn active" data-tab="featuresTab">Feature Importance</button>
+                    <button class="tab-btn" data-tab="scatterTab">Actual vs Predicted</button>
+                    <button class="tab-btn" data-tab="distributionTab">Price Distribution</button>
+                    <button class="tab-btn" data-tab="metricsTab">Metrics Table</button>
+                </div>
+            </div>
+
+            <div class="tab-contents">
+                <!-- Tab 1: Feature Importance Chart -->
+                <div class="tab-pane active" id="featuresTab">
+                    <div class="chart-container">
+                        <canvas id="featureChart"></canvas>
+                    </div>
+                    <p class="tab-caption">
+                        <strong>Key Finding:</strong> <em>Present Price</em> is the dominant predictor of resale value (~86%), followed by <em>Car Age</em> and <em>Kilometers Driven</em>.
+                    </p>
+                </div>
+
+                <!-- Tab 2: Actual vs Predicted Image -->
+                <div class="tab-pane" id="scatterTab">
+                    <div class="image-wrapper">
+                        <img src="/images/actual_vs_predicted.png" alt="Actual vs Predicted Prices" class="analytics-img">
+                    </div>
+                    <p class="tab-caption">
+                        The close clustering along the red dashed line ($y = x$) confirms the model's high predictive precision on unseen test vehicles ($R^2 = 0.959$).
+                    </p>
+                </div>
+
+                <!-- Tab 3: Price Distribution Image -->
+                <div class="tab-pane" id="distributionTab">
+                    <div class="image-wrapper">
+                        <img src="/images/price_distribution.png" alt="Price Distribution" class="analytics-img">
+                    </div>
+                    <p class="tab-caption">
+                        Both Selling Price and Present Price exhibit positive skewness, with the majority of used vehicles transacting under ₹10 Lakhs.
+                    </p>
+                </div>
+
+                <!-- Tab 4: Metrics Comparison Table -->
+                <div class="tab-pane" id="metricsTab">
+                    <div class="table-responsive">
+                        <table class="metrics-table">
+                            <thead>
+                                <tr>
+                                    <th>Model Name</th>
+                                    <th>MAE (Lakhs)</th>
+                                    <th>RMSE (Lakhs)</th>
+                                    <th>R² Score</th>
+                                    <th>Key Advantage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Linear Regression</strong></td>
+                                    <td>1.2162</td>
+                                    <td>1.8652</td>
+                                    <td>0.8490 (84.9%)</td>
+                                    <td>Fast, transparent, explains global baseline trends</td>
+                                </tr>
+                                <tr class="highlight-row">
+                                    <td><strong>Random Forest Regressor (Tuned)</strong> 🏆</td>
+                                    <td><strong>0.6390</strong></td>
+                                    <td><strong>0.9661</strong></td>
+                                    <td><strong>0.9595 (95.9%)</strong></td>
+                                    <td>Captures non-linear vehicle depreciation & interactions</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>© 2026 Car Price Prediction Project | Built with Python, Scikit-Learn, Flask & Chart.js</p>
+            <p class="footer-sub">CarDekho Machine Learning Pipeline Demonstration</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
